@@ -11,7 +11,7 @@
   clojure.data.xml.test-parse
   (:require
    [clojure.test :refer :all]
-   [clojure.data.xml :refer [parse-str element]]
+   [clojure.data.xml :refer [parse-str element cdata]]
    [clojure.data.xml.test-utils :refer [test-stream lazy-parse*]]))
 
 (deftest simple
@@ -53,8 +53,13 @@
 (let [input "<cdata><is><here><![CDATA[<dont><parse><me>]]></here></is></cdata>"
       expected (element :cdata {} (element :is {}
                                            (element :here {}
-                                                    "<dont><parse><me>")))]
-  (is (= expected (lazy-parse* input)))))
+                                                    "<dont><parse><me>")))
+      expected-with-cdata (element :cdata {}
+                                   (element :is {}
+                                            (element :here {}
+                                                     (cdata "<dont><parse><me>"))))]
+  (is (= expected (lazy-parse* input)))
+  (is (= expected-with-cdata (parse-str input :coalescing false :report-cdata true)))))
 
 (deftest test-comment-parse
 (let [input "<comment><is><here><!-- or could be -->there</here></is></comment>"
@@ -129,3 +134,9 @@
         [{:tag :value, :attrs {}, :content
           [{:tag :string, :attrs {}, :content
             ["\n          Clojure XML <3 \n        "]}]}]}]}]}))
+
+(deftest test-remove-whitespace
+  (let [input "<foo>\n  <bar> hello world </bar>\n</foo>"
+        expected (element :foo {}
+                          (element :bar {} "hello world"))]
+    (is (= expected (parse-str input :skip-whitespace true :trim-whitespace true)))))
