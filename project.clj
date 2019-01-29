@@ -1,4 +1,4 @@
-(defproject org.clojure/data.xml "0-UE-DEVELOPMENT"
+(defproject liftoff/data.xml "0-UE-DEVELOPMENT-liftoff-2"
   :source-paths ["src/main/clojure" "src/main/clojurescript"]
   :test-paths ["src/test/clojure" "src/test/clojurescript"]
   :resource-paths ["src/main/resources" "src/test/resources" "target/gen-resources"]

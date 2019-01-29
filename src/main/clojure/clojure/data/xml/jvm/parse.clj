@@ -31,7 +31,8 @@
    :validating XMLInputFactory/IS_VALIDATING
    :reporter XMLInputFactory/REPORTER
    :resolver XMLInputFactory/RESOLVER
-   :support-dtd XMLInputFactory/SUPPORT_DTD})
+   :support-dtd XMLInputFactory/SUPPORT_DTD
+   :report-cdata "http://java.sun.com/xml/stream/properties/report-cdata-event"})
 
 (defn- attr-prefix [^XMLStreamReader sreader index]
   (let [p (.getAttributePrefix sreader index)]
@@ -69,7 +70,7 @@
 (defn pull-seq
   "Creates a seq of events.  The XMLStreamConstants/SPACE clause below doesn't seem to
    be triggered by the JDK StAX parser, but is by others.  Leaving in to be more complete."
-  [^XMLStreamReader sreader {:keys [include-node? location-info skip-whitespace] :as opts} ns-envs]
+  [^XMLStreamReader sreader {:keys [include-node? location-info skip-whitespace trim-whitespace] :as opts} ns-envs]
   (lazy-seq
    (loop []
      (let [location (when location-info
@@ -95,6 +96,18 @@
                (cons (->EndElementEvent)
                      (pull-seq sreader opts (rest ns-envs))))
            (recur))
+         XMLStreamConstants/CDATA
+         (if-let [text (and (include-node? :characters)
+                            (not (and skip-whitespace
+                                      (.isWhiteSpace sreader)))
+                            (.getText sreader))]
+           (if (zero? (.length ^CharSequence text))
+             (recur)
+             (cons (->CDataEvent (if trim-whitespace
+                                   (str/trim text)
+                                   text))
+                   (pull-seq sreader opts ns-envs)))
+           (recur))
          XMLStreamConstants/CHARACTERS
          (if-let [text (and (include-node? :characters)
                             (not (and skip-whitespace
@@ -102,7 +115,9 @@
                             (.getText sreader))]
            (if (zero? (.length ^CharSequence text))
              (recur)
-             (cons (->CharsEvent text)
+             (cons (->CharsEvent (if trim-whitespace
+                                   (str/trim text)
+                                   text))
                    (pull-seq sreader opts ns-envs)))
            (recur))
          XMLStreamConstants/COMMENT
