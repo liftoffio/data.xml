@@ -57,6 +57,7 @@ Options:
 
   :include-node? can be a subset of #{:element :characters :comment} default #{:element :characters}
   :location-info pass false to skip generating location meta data
+  :trim-whitespace pass true to trim leading/trailing whitespace from text elements
 
 See http://docs.oracle.com/javase/6/docs/api/javax/xml/stream/XMLInputFactory.html
 for documentation on options:
@@ -69,7 +70,8 @@ for documentation on options:
    :validating                     XMLInputFactory/IS_VALIDATING
    :reporter                       XMLInputFactory/REPORTER
    :resolver                       XMLInputFactory/RESOLVER
-   :support-dtd                    XMLInputFactory/SUPPORT_DTD}"
+   :support-dtd                    XMLInputFactory/SUPPORT_DTD
+   :report-cdata                   http://java.sun.com/xml/stream/properties/report-cdata-event}"
   {:arglists (list ['source parser-opts-arg])}
   [source opts]
   (let [props* (merge {:include-node? #{:element :characters}
@@ -91,6 +93,7 @@ Options:
 
   :include-node? can be a subset of #{:element :characters :comment} default #{:element :characters}
   :location-info pass false to skip generating location meta data
+  :trim-whitespace pass true to trim leading/trailing whitespace from text elements
 
 See http://docs.oracle.com/javase/6/docs/api/javax/xml/stream/XMLInputFactory.html
 for documentation on options:
@@ -103,7 +106,8 @@ for documentation on options:
    :validating                     XMLInputFactory/IS_VALIDATING
    :reporter                       XMLInputFactory/REPORTER
    :resolver                       XMLInputFactory/RESOLVER
-   :support-dtd                    XMLInputFactory/SUPPORT_DTD}"
+   :support-dtd                    XMLInputFactory/SUPPORT_DTD
+   :report-cdata                   http://java.sun.com/xml/stream/properties/report-cdata-event}"
   {:arglists (list ['source '& parser-opts-arg])}
   [source & {:as opts}]
   (event-tree (event-seq source opts)))
@@ -115,6 +119,7 @@ Options:
 
   :include-node? can be a subset of #{:element :characters :comment} default #{:element :characters}
   :location-info pass false to skip generating location meta data
+  :trim-whitespace pass true to trim leading/trailing whitespace from text elements
 
 See http://docs.oracle.com/javase/6/docs/api/javax/xml/stream/XMLInputFactory.html
 for documentation on options:
@@ -127,7 +132,8 @@ for documentation on options:
    :validating                     XMLInputFactory/IS_VALIDATING
    :reporter                       XMLInputFactory/REPORTER
    :resolver                       XMLInputFactory/RESOLVER
-   :support-dtd                    XMLInputFactory/SUPPORT_DTD}"
+   :support-dtd                    XMLInputFactory/SUPPORT_DTD
+   :report-cdata                   http://java.sun.com/xml/stream/properties/report-cdata-event}"
   {:arglists (list ['string '& parser-opts-arg])}
   [s & opts]
   (apply parse (string-source s) opts))
