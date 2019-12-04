@@ -1,6 +1,6 @@
 (ns clojure.data.xml.spec
-  (:require [clojure.spec :as s]
-            [#?(:cljs cljs.spec.impl.gen :clj clojure.spec.gen) :as gen]
+  (:require [clojure.spec.alpha :as s]
+            [#?(:cljs cljs.spec.impl.gen :clj clojure.spec.gen.alpha) :as gen]
             clojure.test.check.generators
             [clojure.data.xml :as xml]
             [clojure.data.xml.name :as name]
@@ -13,11 +13,16 @@
           (fn [qn]
             (try {:uri (name/qname-uri qn)
                   :local (name/qname-local qn)}
-                 (catch :default e
-                   (.error js/console e "Could not conform to qname:" qn)
-                   ::s/invalid)))
+                 #?(:cljs (catch :default e
+                            (.error js/console e "Could not conform to qname:" qn)
+                            ::s/invalid)
+                    :clj (catch Exception e
+                           (throw (ex-info "Could not conform to qname."
+                                           {:qn qn}
+                                           e))))))
           (fn [{:keys [uri local] :as arg}]
-            (.log js/console arg)
+            #?(:cljs (.log js/console arg)
+               :clj (println arg))
             (name/qname uri local)))
          #(not (str/blank? (:local %)))))
 
@@ -42,20 +47,22 @@
           :opt-un [::node/attrs ::node/content]))
 
 #?(:cljs
-   (do (s/def ::dom/Element (s/with-gen (partial instance? dom/Element)
-                              #(gen/fmap dom/element-node (s/gen ::node/Element))))
-       (s/def ::dom/Text (s/with-gen (partial instance? dom/Text)
-                           #(gen/fmap dom/text-node (gen/string-ascii))))))
+   (do (s/def :clojure.data.xml.js.dom/Element
+         (s/with-gen (partial instance? dom/Element)
+           #(gen/fmap dom/element-node (s/gen ::node/Element))))
+       (s/def :clojure.data.xml.js.dom/Text
+         (s/with-gen (partial instance? dom/Text)
+           #(gen/fmap dom/text-node (gen/string-ascii))))))
 
 (s/def ::xml/Element
   #?(:clj ::node/Element
-     :cljs (s/or :dom ::dom/Element
+     :cljs (s/or :dom :clojure.data.xml.js.dom/Element
                  :rec ::node/Element)))
 
 (s/def ::xml/Text
   (s/or :blank (s/with-gen str/blank? #(s/gen #{"" nil}))
         :str string?
-        #?@(:cljs [:text ::dom/Text])))
+        #?@(:cljs [:text :clojure.data.xml.js.dom/Text])))
 
 (s/def ::xml/Node
   (s/or :text ::xml/Text
@@ -74,7 +81,7 @@
    (s/coll-of ::name/qname)
    [:foo :xmlns/foo])
 
-  (require '[clojure.spec.gen :as gen])
+  (require '[clojure.spec.gen.alpha :as gen])
 
   (s/exercise ::name/qname)
 
