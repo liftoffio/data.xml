@@ -1,19 +1,18 @@
 {:paths ["src/main/clojure"
          "src/main/resources"]
  :deps {org.clojure/clojure {:mvn/version "1.10.1"}
-        org.clojure/data.codec {:mvn/version "0.1.1"}
         org.clojure/clojurescript {:mvn/version "1.10.439"}
-        com.cemerick/piggieback {:mvn/version "0.2.2"}
-        org.clojure/tools.nrepl {:mvn/version "0.2.13"}
-        org.clojure/test.check {:mvn/version "0.9.0"}
-        figwheel-sidecar {:mvn/version "0.5.17"}
-        binaryage/devtools {:mvn/version "0.9.10"}}
+        org.clojure/data.codec {:mvn/version "0.1.1"}}
  :aliases
    {:test {:extra-paths ["src/test/clojure"
                          "src/test/resources"
                          "target/gen-resources"]
            :extra-deps {com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"
-                                                   :sha "209b64504cb3bd3b99ecfec7937b358a879f55c1"}}
+                                                   :sha "209b64504cb3bd3b99ecfec7937b358a879f55c1"}
+                        com.cemerick/piggieback {:mvn/version "0.2.2"}
+                        org.clojure/tools.nrepl {:mvn/version "0.2.13"}
+                        figwheel-sidecar {:mvn/version "0.5.17"}
+                        binaryage/devtools {:mvn/version "0.9.10"}}
            :main-opts ["-m" "cognitect.test-runner"
                        "--dir" "src/test/clojure/"
-                       "-namespace-regex" ".*test.*"]}}}
+                       "--namespace-regex" ".*test.*"]}}}
